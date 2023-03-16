@@ -232,16 +232,7 @@ class App(customtkinter.CTk):
             self.sidebar_frame, text="busca de clientes", font=customtkinter.CTkFont(size=15))
         self.sidebar_description_label.grid(row=1, column=0, padx=20, pady=(0, 10))
 
-        # BOTÃO DE SELAÇÃO DO DIÁRIO
-        self.button_pdf_find = customtkinter.CTkButton(
-            self.sidebar_frame, command=browse_pdf, text='Selecionar Diário')
-        self.button_pdf_find.grid(row=2, column=0, padx=20, pady=10)
-
-        # BOTÃO DE BUSCA
-        if NUM_SEARCHES == 0:
-            self.button_search = customtkinter.CTkButton(
-                self.sidebar_frame, command=lambda: buscar_palavras(self), text='Buscar clientes')
-            self.button_search.grid(row=3, column=0, padx=20, pady=10)
+        
 
         # MENU DE TEMA
         self.appearance_mode_label = customtkinter.CTkLabel(
@@ -254,32 +245,75 @@ class App(customtkinter.CTk):
         self.appearance_mode_optionemenu.grid(
             row=6, column=0, padx=20, pady=(0, 20))
 
-        #-----------------------------#
-        ###### ====RESULTADOS====######
+        #----------------------------------#
+        ###### ====GESTÃO CLIENTES====######
+        self.clients_frame = customtkinter.CTkFrame(
+            self, corner_radius=5)
+        self.clients_frame.grid(row=0, column=1, padx=10,
+                                pady=10, rowspan=4, sticky="nsew")
+        self.clients_frame.grid_rowconfigure(0, weight=1)
+        self.clients_frame.grid_columnconfigure(0, weight=1, minsize=400)
+
+
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame, label_text="Gerenciamento de clientes", corner_radius=5)
+        self.scrollable_frame.grid(row=0, column=0, padx=(10, 10), pady=(10, 20), sticky="nsew")
+        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.scrollable_frame_switches = []
+        self.clients_frame.grid_rowconfigure(0, weight=0)
+        self.clients_frame.grid_columnconfigure(0, weight=1)
+
+
+        #------------------------------------#
+        ###### ====BUSCA DE CLIENTES====######
         self.results_frame = customtkinter.CTkFrame(
             self, corner_radius=5)
-        self.results_frame.grid(row=0, column=1, padx=10,
+        self.results_frame.grid(row=0, column=2, padx=10,
                                 pady=10, rowspan=4, sticky="nsew")
         self.results_frame.grid_rowconfigure(4, weight=1)
 
-        # TÍTULO
-        self.logo_label = customtkinter.CTkLabel(
-            self.results_frame, text="Resultado da busca:", font=customtkinter.CTkFont(size=15, weight="bold"))
-        self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 0))
+
+        #TÍTULO DO FRAME
+        self.find_title_label = customtkinter.CTkLabel(
+            self.results_frame, text="Busca de clientes", font=customtkinter.CTkFont(size=18, weight="bold"))
+        self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
+
+        # BOTÃO DE SELAÇÃO DO DIÁRIO
+        self.button_pdf_find = customtkinter.CTkButton(
+            self.results_frame, command=browse_pdf, text='Selecionar Diário')
+        self.button_pdf_find.grid(row=1, column=0, padx=20, pady=10)
+
+        # BOTÃO DE BUSCA
+        if NUM_SEARCHES == 0:
+            self.button_search = customtkinter.CTkButton(
+                self.results_frame, command=lambda: buscar_palavras(self), text='Buscar clientes')
+            self.button_search.grid(row=2, column=0, padx=20, pady=10)
+
+        #TÍTULO CAIXA DE TEXTO
+        self.results_title_label = customtkinter.CTkLabel(
+            self.results_frame, text="Resultados da busca:", font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.results_title_label.grid(row=3, column=0, padx=20, pady=(20, 0))
 
         # CAIXA DE TEXTO
         self.textbox = customtkinter.CTkTextbox(
-            self.results_frame, width=500, corner_radius=5)
-        self.textbox.grid(row=1, column=0, padx=(
+            self.results_frame, width=400, corner_radius=5)
+        self.textbox.grid(row=4, column=0, padx=(
             20, 20), pady=(0, 0), sticky="nsew")
 
         # BARRA DE PROGRESSO
         self.progressbar = customtkinter.CTkProgressBar(
             self.results_frame)
-        self.progressbar.grid(row=2, column=0, padx=(
-            20, 20), pady=(10, 10), sticky="ew")
+        self.progressbar.grid(row=5, column=0, padx=(
+            20, 20), pady=(10, 20), sticky="ew")
+        
+        # BOTÃO DE CONTATAR
+        if NUM_SEARCHES == 0:
+            self.button_search = customtkinter.CTkButton(
+                self.results_frame, command=lambda: buscar_palavras(self), text='Contactar Clientes')
+            self.button_search.grid(row=6, column=0, padx=20, pady=10)
 
         ################################
+        
+        
         # Valores Default
         self.appearance_mode_optionemenu.set("System")
         self.progressbar.set(0)
