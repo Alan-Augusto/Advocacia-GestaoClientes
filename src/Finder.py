@@ -66,21 +66,30 @@ class Client():
         if self.subname_04 != "NA":
             print("\t|_Sub-Cliente 04: ", self.subname_04)
 
-    def get_name(self):
-        return self.name
+    def get_names(self, value):
+        if value == 1:
+            return self.name
+        if value == 2:
+            return self.subname_01
+        if value == 3:
+            return self.subname_02
+        if value == 4:
+            return self.subname_03
+        if value == 5:
+            return self.subname_04
     
-    def more_one_name(self):
-        
+    def qtd_names(self):
+        qtd = 1
         if self.subname_01 != "NA":
-            return True
+            qtd += 1
         if self.subname_02 != "NA":
-            return True
+            qtd += 1
         if self.subname_03 != "NA":
-            return True
+            qtd += 1
         if self.subname_04 != "NA":
-            return True
-        return false
-    
+            qtd += 1
+        return qtd
+
     def getID(self):
         return self.ID
 
@@ -127,12 +136,11 @@ class ClientsList():
         self.IDsFound.append(value)
 
     def get_searchable_list(self):
+        #Percorre a lista de clientes
         for i in range(len(self.clients)):
-            SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_name())),
-        #print(SEARCHABLE_LIST)
-        #Nome-> list[0][1]
-        #ID  -> list[0][1]
-        print("get_searchable_list")
+            #Adiciona os nomes à lista de pesquisáveis de acordo com a quantidade de nomes
+            for j in range(1, ((self.clients[i].qtd_names())+1)):
+                SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_names(j)))
 
 ### VARIÁBVEIS GLOBAIS ###
 CLIENTS_CSV_FILE = './data/Clientes.csv'
