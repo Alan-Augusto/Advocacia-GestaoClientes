@@ -8,9 +8,7 @@ import tkinter.messagebox
 import customtkinter
 from PIL import Image
 
-### VARIÁBVEIS GLOBAIS ###
-CLIENTS_CSV_FILE = './data/Clientes.csv'
-NUM_SEARCHES = 0
+
 
 ### CLASSES ###
 class Client():
@@ -68,12 +66,30 @@ class Client():
         if self.subname_04 != "NA":
             print("\t|_Sub-Cliente 04: ", self.subname_04)
 
+    def get_name(self):
+        return self.name
+    
+    def more_one_name(self):
+        
+        if self.subname_01 != "NA":
+            return True
+        if self.subname_02 != "NA":
+            return True
+        if self.subname_03 != "NA":
+            return True
+        if self.subname_04 != "NA":
+            return True
+        return false
+    
+    def getID(self):
+        return self.ID
 
 class ClientsList():
     def __init__(self):
         super().__init__()
 
         self.clients = []
+        self.IDsFound = []
 
     def add_client(self, client):
         #Define o ID na ordem de inserção
@@ -107,12 +123,28 @@ class ClientsList():
                     names.append(client.subname_04)
         return names
 
-### FUNÇÕES GLOBAIS ###
+    def foundID(self, value):
+        self.IDsFound.append(value)
 
+    def get_searchable_list(self):
+        for i in range(len(self.clients)):
+            SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_name())),
+        #print(SEARCHABLE_LIST)
+        #Nome-> list[0][1]
+        #ID  -> list[0][1]
+        print("get_searchable_list")
+
+### VARIÁBVEIS GLOBAIS ###
+CLIENTS_CSV_FILE = './data/Clientes.csv'
+NUM_SEARCHES = 0
+CLIENTS = ClientsList()
+SEARCHABLE_LIST = []
+
+
+### FUNÇÕES GLOBAIS ###
 #Preenche a lista de clientes na memória
 def fill_list():
-    clients = ClientsList()
-
+    
     #Buscar os dados do arquivo csv
     with open(CLIENTS_CSV_FILE, newline='', encoding='utf-8') as csv_file:
         reader = csv.reader(csv_file, delimiter=',')
@@ -125,9 +157,8 @@ def fill_list():
             client = Client(name, subname_01, subname_02, subname_03,
                             subname_04, cnpj, email, number, representative, ativo)
             #Adiciona na classe clients
-            clients.add_client(client)
-
-    return clients
+            CLIENTS.add_client(client)
+    
 
 #Obtem o caminho do arquivo pdf
 def browse_pdf():
@@ -143,9 +174,6 @@ def buscar_palavras(app):
     global NUM_SEARCHES
     NUM_SEARCHES += 1
     app.update_search_button()
-
-    clients = fill_list()
-    client_names = clients.searched_names()
 
     # Abrir o arquivo PDF selecionado pelo usuário e criar um objeto PDFReader
     with pdfplumber.open(pdf_file) as pdf:
@@ -163,13 +191,18 @@ def buscar_palavras(app):
 
             # Atualizar Barra de progresso
             app.update_progress_bar((page_num+1)/num_paginas)
-
             # Verificar se cada palavra do arquivo CSV está na página atual do PDF
-            for client in client_names:
+            for i in range(len(SEARCHABLE_LIST)):
                 # Utilizar expressão regular para buscar pela palavra completa no texto da página
                 matches = re.findall(r'\b{}\b'.format(
-                    client), text, re.IGNORECASE)
+                    SEARCHABLE_LIST[i][1]), text, re.IGNORECASE)
                 if matches:
+                    #Adicionar à lista de ID's encontrados
+                    CLIENTS.foundID(SEARCHABLE_LIST[i][0])
+
+                    #Aplicar find ao cliente encontrado:
+                    ##
+                
                     for match in matches:
                         finded_number += 1
                         app.textbox.insert(
@@ -188,7 +221,8 @@ def buscar_palavras(app):
 
                 app.textbox.insert(
                     tk.END, f'Busca finalizada!\n')
-
+        print("Id's encontrados -> ", CLIENTS.IDsFound)
+        
 
 ### PADRÕES DEFAULT DA INTERFACE ##
 # Modes: "System" (standard), "Dark", "Light"
@@ -224,7 +258,7 @@ class App(customtkinter.CTk):
                                                  size=(60, 40))
 
         self.logo_frame_label = customtkinter.CTkLabel(self.sidebar_frame, text="campello\ncastro", image=self.logo_image,
-                                                       compound="left", font=customtkinter.CTkFont(size=15, weight="bold"))
+                                                       compound="left", font=customtkinter.CTkFont( size=12, weight="bold"))
         self.logo_frame_label.grid(row=0, column=0, padx=20, pady=(10, 20))
 
         # DESCRIÇÃO
@@ -255,13 +289,25 @@ class App(customtkinter.CTk):
         self.clients_frame.grid_columnconfigure(0, weight=1, minsize=400)
 
 
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame, label_text="Gerenciamento de clientes", corner_radius=5)
-        self.scrollable_frame.grid(row=0, column=0, padx=(10, 10), pady=(10, 20), sticky="nsew")
+        
+        #TÍTULO DO FRAME
+        self.find_title_label = customtkinter.CTkLabel(
+            self.clients_frame, text="Gerenciamento de clientes", font=customtkinter.CTkFont( size=22, weight="bold"))
+        self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
+
+        #SCROLLABLE FRAME
+        #self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame, label_text="Lista de Clientes", corner_radius=5)
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame,corner_radius=5)
+        self.scrollable_frame.grid(row=1, column=0, padx=(10, 10), pady=(10, 20), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.scrollable_frame_switches = []
         self.clients_frame.grid_rowconfigure(0, weight=0)
         self.clients_frame.grid_columnconfigure(0, weight=1)
-
+       
+        self.scrollable_frame_switches = []
+        for i in range(100):
+            switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"Cliente {i}")
+            switch.grid(row=i, column=0, padx=10, pady=(0, 20))
+            self.scrollable_frame_switches.append(switch)
 
         #------------------------------------#
         ###### ====BUSCA DE CLIENTES====######
@@ -274,7 +320,7 @@ class App(customtkinter.CTk):
 
         #TÍTULO DO FRAME
         self.find_title_label = customtkinter.CTkLabel(
-            self.results_frame, text="Busca de clientes", font=customtkinter.CTkFont(size=18, weight="bold"))
+            self.results_frame, text="Busca em diário", font=customtkinter.CTkFont(size=22, weight="bold"))
         self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
 
         # BOTÃO DE SELAÇÃO DO DIÁRIO
@@ -308,7 +354,7 @@ class App(customtkinter.CTk):
         # BOTÃO DE CONTATAR
         if NUM_SEARCHES == 0:
             self.button_search = customtkinter.CTkButton(
-                self.results_frame, command=lambda: buscar_palavras(self), text='Contactar Clientes')
+                self.results_frame, text='Contactar Clientes')
             self.button_search.grid(row=6, column=0, padx=20, pady=10)
 
         ################################
@@ -340,5 +386,9 @@ class App(customtkinter.CTk):
 
 ### MAIN ###
 if __name__ == "__main__":
+    #LER OS ARQUIVOS DO CSV
+    fill_list()
+    CLIENTS.get_searchable_list()
+    
     app = App()
     app.mainloop()
