@@ -31,41 +31,7 @@ class Client():
         if actived != "TRUE":
             self.actived = False
 
-    def set_ID(self, number):
-        self.ID = number
-
-    def change_name(self, new_name):
-        self.name = new_name
-
-    def change_cnpj(self, new_cnpj):
-        self.cnpj = new_cnpj
-
-    def change_number(self, new_number):
-        self.number = new_number
-
-    def change_email(self, new_email):
-        self.email = new_email
-
-    def make_cited(self):
-        self.cited = True
-
-    def select(self):
-        self.selected = True
-
-    def print(self):
-        print("Cited: ", self.cited, "|",self.ID, "|",
-              self.name, " - ", self.cnpj, "Ativo: ", self.actived)
-        
-        # Seção de subclientes
-        if self.subname_01 != "NA":
-            print("\t|_Sub-Cliente 01: ", self.subname_01)
-        if self.subname_02 != "NA":
-            print("\t|_Sub-Cliente 02: ", self.subname_02)
-        if self.subname_03 != "NA":
-            print("\t|_Sub-Cliente 03: ", self.subname_03)
-        if self.subname_04 != "NA":
-            print("\t|_Sub-Cliente 04: ", self.subname_04)
-
+    ##--GETTERS--##
     def get_names(self, value):
         if value == 1:
             return self.name
@@ -95,13 +61,50 @@ class Client():
 
     def is_active(self):
         return self.actived
+    
+    ##--SETTERS--##
+    def set_ID(self, number):
+        self.ID = number
+
+    def change_name(self, new_name):
+        self.name = new_name
+
+    def change_cnpj(self, new_cnpj):
+        self.cnpj = new_cnpj
+
+    def change_number(self, new_number):
+        self.number = new_number
+
+    def change_email(self, new_email):
+        self.email = new_email
+
+    def make_cited(self):
+        self.cited = True
+
+    def select(self):
+        self.selected = True
+
+    ##--OTHERS--##
+    def print(self):
+        print("Cited: ", self.cited, "|",self.ID, "|",
+              self.name, " - ", self.cnpj, "Ativo: ", self.actived)
+        
+        # Seção de subclientes
+        if self.subname_01 != "NA":
+            print("\t|_Sub-Cliente 01: ", self.subname_01)
+        if self.subname_02 != "NA":
+            print("\t|_Sub-Cliente 02: ", self.subname_02)
+        if self.subname_03 != "NA":
+            print("\t|_Sub-Cliente 03: ", self.subname_03)
+        if self.subname_04 != "NA":
+            print("\t|_Sub-Cliente 04: ", self.subname_04)
+
 
 class ClientsList():
     def __init__(self):
         super().__init__()
 
         self.clients = []
-        self.IDsFound = []
 
     #Adiciona um novo cliente
     def add_client(self, client):
@@ -120,21 +123,17 @@ class ClientsList():
         for client in self.clients:
             client.print()
 
-    #Remover??
-    #Adicoina um ID na lista de ID's encontrados
-    def foundID(self, value):
-        self.IDsFound.append(value)
-
     #Gera uma lista com os nomes e ID's dos clientes ATIVOS
     def get_searchable_list(self):
         #Percorre a lista de clientes
         for i in range(len(self.clients)):
-            
+
             if self.clients[i].is_active():
                 #Adiciona os nomes à lista de pesquisáveis de acordo com a quantidade de nomes
                 for j in range(1, ((self.clients[i].qtd_names())+1)):
                     SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_names(j)))
 
+    #Define um cliente como citado pelo ID
     def finded(self, value):
         self.clients[value-1].make_cited()
 
@@ -171,7 +170,7 @@ def browse_pdf():
         filetypes=[('Arquivos PDF', '*.pdf')])
 
 #Busca os clientes no arquivo PDF
-def buscar_palavras(app):
+def seek_client(app):
 
     app.textbox.delete(1.0, tk.END)
 
@@ -301,7 +300,7 @@ class App(customtkinter.CTk):
 
         #SCROLLABLE FRAME
         #self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame, label_text="Lista de Clientes", corner_radius=5)
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame,corner_radius=5)
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame,corner_radius=5, height=400)
         self.scrollable_frame.grid(row=1, column=0, padx=(10, 10), pady=(10, 20), sticky="nsew")
         self.scrollable_frame.grid_columnconfigure(0, weight=1)
         self.clients_frame.grid_rowconfigure(0, weight=0)
@@ -309,9 +308,20 @@ class App(customtkinter.CTk):
        
         self.scrollable_frame_switches = []
         for i in range(100):
-            switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"Cliente {i}")
-            switch.grid(row=i, column=0, padx=10, pady=(0, 20))
-            self.scrollable_frame_switches.append(switch)
+            
+            client_frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=5, height=30)
+            client_frame.grid(row=i, column=0, padx=10,
+                                    pady=5, rowspan=4, sticky="nsew")
+            client_frame.grid_rowconfigure(0, weight=1)
+            client_frame.grid_columnconfigure(0, weight=1, minsize=50)
+            
+            client_data = customtkinter.CTkLabel(
+                client_frame, text="Cliente teste", font=customtkinter.CTkFont(size=12))
+            client_data.grid(row=0, column=0, padx=20, pady=(2, 0))        
+            
+            #switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"Cliente {i}")
+            #switch.grid(row=i, column=0, padx=10, pady=(0, 20))
+            self.scrollable_frame_switches.append(client_frame)
 
         #------------------------------------#
         ###### ====BUSCA DE CLIENTES====######
@@ -335,7 +345,7 @@ class App(customtkinter.CTk):
         # BOTÃO DE BUSCA
         if NUM_SEARCHES == 0:
             self.button_search = customtkinter.CTkButton(
-                self.results_frame, command=lambda: buscar_palavras(self), text='Buscar clientes')
+                self.results_frame, command=lambda: seek_client(self), text='Buscar clientes')
             self.button_search.grid(row=2, column=0, padx=20, pady=10)
 
         #TÍTULO CAIXA DE TEXTO
@@ -357,9 +367,9 @@ class App(customtkinter.CTk):
         
         # BOTÃO DE CONTATAR
         if NUM_SEARCHES == 0:
-            self.button_search = customtkinter.CTkButton(
-                self.results_frame, text='Contactar Clientes')
-            self.button_search.grid(row=6, column=0, padx=20, pady=10)
+            self.contact_button = customtkinter.CTkButton(
+                self.results_frame, text='Contatar Clientes')
+            self.contact_button.grid(row=6, column=0, padx=20, pady=10)
 
         ################################
         
