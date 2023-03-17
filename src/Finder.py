@@ -93,6 +93,9 @@ class Client():
     def getID(self):
         return self.ID
 
+    def is_active(self):
+        return self.actived
+
 class ClientsList():
     def __init__(self):
         super().__init__()
@@ -100,47 +103,40 @@ class ClientsList():
         self.clients = []
         self.IDsFound = []
 
+    #Adiciona um novo cliente
     def add_client(self, client):
         #Define o ID na ordem de inserção
         client.set_ID(len(self.clients)+1)
         #Adiciona o cliente na lista
         self.clients.append(client)
 
+    #Remove um cliente
     def remove_client(self, clientID):
         #Remove o clente baseado no seu ID
         self.pop(clientID)
 
+    #Printa as informações de um cliente na tela
     def print(self):
         for client in self.clients:
             client.print()
 
-    def searched_names(self):
-        #Lista de nomes a serem pesquisados
-        names = []
-
-        for client in self.clients:
-            #Realiza a pesquisa somente se o cliente for ativo
-            if client.actived:
-                names.append(client.name)
-                if client.subname_01 != "NA":
-                    names.append(client.subname_01)
-                if client.subname_02 != "NA":
-                    names.append(client.subname_02)
-                if client.subname_03 != "NA":
-                    names.append(client.subname_03)
-                if client.subname_04 != "NA":
-                    names.append(client.subname_04)
-        return names
-
+    #Remover??
+    #Adicoina um ID na lista de ID's encontrados
     def foundID(self, value):
         self.IDsFound.append(value)
 
+    #Gera uma lista com os nomes e ID's dos clientes ATIVOS
     def get_searchable_list(self):
         #Percorre a lista de clientes
         for i in range(len(self.clients)):
-            #Adiciona os nomes à lista de pesquisáveis de acordo com a quantidade de nomes
-            for j in range(1, ((self.clients[i].qtd_names())+1)):
-                SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_names(j)))
+            
+            if self.clients[i].is_active():
+                #Adiciona os nomes à lista de pesquisáveis de acordo com a quantidade de nomes
+                for j in range(1, ((self.clients[i].qtd_names())+1)):
+                    SEARCHABLE_LIST.append((self.clients[i].getID(), self.clients[i].get_names(j)))
+
+    def finded(self, value):
+        self.clients[value-1].make_cited()
 
 ### VARIÁBVEIS GLOBAIS ###
 CLIENTS_CSV_FILE = './data/Clientes.csv'
@@ -205,11 +201,10 @@ def buscar_palavras(app):
                 matches = re.findall(r'\b{}\b'.format(
                     SEARCHABLE_LIST[i][1]), text, re.IGNORECASE)
                 if matches:
+                    CLIENTS.finded(SEARCHABLE_LIST[i][0])
                     #Adicionar à lista de ID's encontrados
-                    CLIENTS.foundID(SEARCHABLE_LIST[i][0])
-
-                    #Aplicar find ao cliente encontrado:
-                    ##
+                    #CLIENTS.foundID(SEARCHABLE_LIST[i][0])
+                    #print(SEARCHABLE_LIST[i][0], "->ID ENCONTRADO")
                 
                     for match in matches:
                         finded_number += 1
@@ -219,17 +214,18 @@ def buscar_palavras(app):
             if (page_num+1) == num_paginas:
                 if finded_number > 1:
                     app.textbox.insert(
-                        tk.END, f'_____________________________\n{finded_number} correspondências encontrados\n_____________________________\n')
+                        tk.END, f'_____________________________\n{finded_number} correspondências encontradAs\n_____________________________\n')
                 if finded_number == 1:
                     app.textbox.insert(
                         tk.END, f'_____________________________\nSomente uma correspondência encontrada\n_____________________________\n')
                 if finded_number == 0:
                     app.textbox.insert(
-                        tk.END, f'_____________________________\nNenhum cliente encontrado\n_____________________________\n')
+                        tk.END, f'_____________________________\nNenhuma correspondência encontrada\n_____________________________\n')
 
                 app.textbox.insert(
                     tk.END, f'Busca finalizada!\n')
         print("Id's encontrados -> ", CLIENTS.IDsFound)
+        CLIENTS.print()
         
 
 ### PADRÕES DEFAULT DA INTERFACE ##
@@ -396,6 +392,7 @@ class App(customtkinter.CTk):
 if __name__ == "__main__":
     #LER OS ARQUIVOS DO CSV
     fill_list()
+    CLIENTS.print()
     CLIENTS.get_searchable_list()
     
     app = App()
