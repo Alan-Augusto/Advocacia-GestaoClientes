@@ -137,6 +137,33 @@ class ClientsList():
     def finded(self, value):
         self.clients[value-1].make_cited()
 
+class ScrollableRadiobuttonFrame(customtkinter.CTkScrollableFrame):
+    def __init__(self, master, item_list, command=None, **kwargs):
+        super().__init__(master, **kwargs)
+
+        self.command = command
+        self.radiobutton_variable = customtkinter.StringVar()
+        self.radiobutton_list = []
+        for i, item in enumerate(item_list):
+            self.add_item(item)
+
+    def add_item(self, item):
+        radiobutton = customtkinter.CTkRadioButton(self, text=item, value=item, variable=self.radiobutton_variable)
+        if self.command is not None:
+            radiobutton.configure(command=self.command)
+        radiobutton.grid(row=len(self.radiobutton_list), column=0, padx=(5, 5), pady=(10, 10), stick="new")
+        self.radiobutton_list.append(radiobutton)
+
+    def remove_item(self, item):
+        for radiobutton in self.radiobutton_list:
+            if item == radiobutton.cget("text"):
+                radiobutton.destroy()
+                self.radiobutton_list.remove(radiobutton)
+                return
+
+    def get_checked_item(self):
+        return self.radiobutton_variable.get()
+
 ### VARIÁBVEIS GLOBAIS ###
 CLIENTS_CSV_FILE = './data/Clientes.csv'
 NUM_SEARCHES = 0
@@ -172,9 +199,9 @@ def browse_pdf():
 #Busca os clientes no arquivo PDF
 def seek_client(app):
 
+    #Limpa a caixa de texto ao iniciar uma nova busca
     app.textbox.delete(1.0, tk.END)
-
-    global NUM_SEARCHES
+    
     NUM_SEARCHES += 1
     app.update_search_button()
 
@@ -226,6 +253,19 @@ def seek_client(app):
         print("Id's encontrados -> ", CLIENTS.IDsFound)
         CLIENTS.print()
         
+#Gera um cliente dentro de um ferame parta aba de gestão
+def generate_client_frame(app, i):
+    client_frame = customtkinter.CTkFrame(app.scrollable_frame, corner_radius=5, height=30)
+    client_frame.grid(row=i, column=0, padx=10,
+                            pady=5, sticky="nsew")
+    client_frame.grid_rowconfigure(0, weight=1)
+    client_frame.grid_columnconfigure(0, weight=1, minsize=50)
+    
+    client_data = customtkinter.CTkLabel(
+        client_frame, text=f"Cliente teste {i}", font=customtkinter.CTkFont(size=12))
+    client_data.grid(row=0, column=0, padx=20, pady=(2, 0))
+
+    return client_frame
 
 ### PADRÕES DEFAULT DA INTERFACE ##
 # Modes: "System" (standard), "Dark", "Light"
@@ -287,7 +327,7 @@ class App(customtkinter.CTk):
         self.clients_frame = customtkinter.CTkFrame(
             self, corner_radius=5)
         self.clients_frame.grid(row=0, column=1, padx=10,
-                                pady=10, rowspan=4, sticky="nsew")
+                                pady=10, rowspan=4, sticky="new")
         self.clients_frame.grid_rowconfigure(0, weight=1)
         self.clients_frame.grid_columnconfigure(0, weight=1, minsize=400)
 
@@ -296,32 +336,16 @@ class App(customtkinter.CTk):
         #TÍTULO DO FRAME
         self.find_title_label = customtkinter.CTkLabel(
             self.clients_frame, text="Gerenciamento de clientes", font=customtkinter.CTkFont( size=22, weight="bold"))
-        self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
+        self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0), sticky="new")
 
         #SCROLLABLE FRAME
-        #self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame, label_text="Lista de Clientes", corner_radius=5)
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.clients_frame,corner_radius=5, height=400)
-        self.scrollable_frame.grid(row=1, column=0, padx=(10, 10), pady=(10, 20), sticky="nsew")
-        self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.clients_frame.grid_rowconfigure(0, weight=0)
-        self.clients_frame.grid_columnconfigure(0, weight=1)
-       
-        self.scrollable_frame_switches = []
-        for i in range(100):
-            
-            client_frame = customtkinter.CTkFrame(self.scrollable_frame, corner_radius=5, height=30)
-            client_frame.grid(row=i, column=0, padx=10,
-                                    pady=5, rowspan=4, sticky="nsew")
-            client_frame.grid_rowconfigure(0, weight=1)
-            client_frame.grid_columnconfigure(0, weight=1, minsize=50)
-            
-            client_data = customtkinter.CTkLabel(
-                client_frame, text="Cliente teste", font=customtkinter.CTkFont(size=12))
-            client_data.grid(row=0, column=0, padx=20, pady=(2, 0))        
-            
-            #switch = customtkinter.CTkSwitch(master=self.scrollable_frame, text=f"Cliente {i}")
-            #switch.grid(row=i, column=0, padx=10, pady=(0, 20))
-            self.scrollable_frame_switches.append(client_frame)
+        # create scrollable radiobutton frame
+        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.clients_frame, height=300, 
+                                                                       command=self.radiobutton_frame_event,
+                                                                       item_list=[f"item {i}" for i in range(100)])
+        self.scrollable_radiobutton_frame.grid(row=1, column=0, padx=15, pady=15, sticky="new")
+        #self.scrollable_radiobutton_frame.configure(width=500)
+        self.scrollable_radiobutton_frame.remove_item("item 3")
 
         #------------------------------------#
         ###### ====BUSCA DE CLIENTES====######
@@ -395,6 +419,8 @@ class App(customtkinter.CTk):
             self.button_search.configure(text="Nova Busca")
         return
 
+    def radiobutton_frame_event(self):
+        print(f"radiobutton frame modified: {self.scrollable_radiobutton_frame.get_checked_item()}")
     # ===========================
         # Valores Default
 
