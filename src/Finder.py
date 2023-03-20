@@ -8,8 +8,6 @@ import tkinter.messagebox
 import customtkinter
 from PIL import Image
 
-
-
 ### CLASSES ###
 class Client():
     def __init__(self, name, subname_01, subname_02, subname_03, subname_04, cnpj, email, number, representative, actived):
@@ -32,6 +30,7 @@ class Client():
             self.actived = False
 
     ##--GETTERS--##
+
     def get_names(self, value):
         if value == 1:
             return self.name
@@ -105,6 +104,8 @@ class ClientsList():
         super().__init__()
 
         self.clients = []
+        self.actived_clients = []
+        self.inactived_clients = []
 
     #Adiciona um novo cliente
     def add_client(self, client):
@@ -112,6 +113,10 @@ class ClientsList():
         client.set_ID(len(self.clients)+1)
         #Adiciona o cliente na lista
         self.clients.append(client)
+        if client.is_active():
+            self.actived_clients.append(client)
+        else:
+            self.inactived_clients.append(client)
 
     #Remove um cliente
     def remove_client(self, clientID):
@@ -188,6 +193,7 @@ def fill_list():
                             subname_04, cnpj, email, number, representative, ativo)
             #Adiciona na classe clients
             CLIENTS.add_client(client)
+            
     
 
 #Obtem o caminho do arquivo pdf
@@ -202,6 +208,7 @@ def seek_client(app):
     #Limpa a caixa de texto ao iniciar uma nova busca
     app.textbox.delete(1.0, tk.END)
     
+    global NUM_SEARCHES
     NUM_SEARCHES += 1
     app.update_search_button()
 
@@ -235,12 +242,12 @@ def seek_client(app):
                     for match in matches:
                         finded_number += 1
                         app.textbox.insert(
-                            tk.END, f'O cliente "{match}" foi encontrada na página {page_num+1}.\n')
+                            tk.END, f'{match} - Página {page_num+1}.\n')
 
             if (page_num+1) == num_paginas:
                 if finded_number > 1:
                     app.textbox.insert(
-                        tk.END, f'_____________________________\n{finded_number} correspondências encontradAs\n_____________________________\n')
+                        tk.END, f'_____________________________\n{finded_number} correspondências encontradas\n_____________________________\n')
                 if finded_number == 1:
                     app.textbox.insert(
                         tk.END, f'_____________________________\nSomente uma correspondência encontrada\n_____________________________\n')
@@ -250,7 +257,7 @@ def seek_client(app):
 
                 app.textbox.insert(
                     tk.END, f'Busca finalizada!\n')
-        print("Id's encontrados -> ", CLIENTS.IDsFound)
+        
         CLIENTS.print()
         
 #Gera um cliente dentro de um ferame parta aba de gestão
@@ -326,6 +333,7 @@ class App(customtkinter.CTk):
         ###### ====GESTÃO CLIENTES====######
         self.clients_frame = customtkinter.CTkFrame(
             self, corner_radius=5)
+        #fg_color="transparent"
         self.clients_frame.grid(row=0, column=1, padx=10,
                                 pady=10, rowspan=4, sticky="new")
         self.clients_frame.grid_rowconfigure(0, weight=1)
@@ -338,14 +346,40 @@ class App(customtkinter.CTk):
             self.clients_frame, text="Gerenciamento de clientes", font=customtkinter.CTkFont( size=22, weight="bold"))
         self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0), sticky="new")
 
-        #SCROLLABLE FRAME
-        # create scrollable radiobutton frame
-        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.clients_frame, height=300, 
+        #Frame com filtros
+        # create tabview
+        self.tabview = customtkinter.CTkTabview(self.clients_frame, width=600)
+        self.tabview.grid(row=2, column=0, padx=15, pady=15, sticky="nsew")
+        self.tabview.add("Ativos")
+        self.tabview.add("Inativos")
+        self.tabview.add("Todos")
+        self.tabview.tab("Ativos").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
+        self.tabview.tab("Inativos").grid_columnconfigure(0, weight=1)
+
+        # Geração de lista de todos os clientes
+        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Todos"), 
                                                                        command=self.radiobutton_frame_event,
-                                                                       item_list=[f"item {i}" for i in range(100)])
-        self.scrollable_radiobutton_frame.grid(row=1, column=0, padx=15, pady=15, sticky="new")
-        #self.scrollable_radiobutton_frame.configure(width=500)
+                                                                       item_list=[f"{i+1} - {CLIENTS.clients[i].name}" for i in range(len(CLIENTS.clients))])
+        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="n")
+        self.scrollable_radiobutton_frame.configure(width = 600, height= 200, fg_color = "transparent")
         self.scrollable_radiobutton_frame.remove_item("item 3")
+
+        # Geração de lista de clientes Ativos
+        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Ativos"), 
+                                                                       command=self.radiobutton_frame_event,
+                                                                       item_list=[f"{i+1} - {CLIENTS.actived_clients[i].name}" for i in range(len(CLIENTS.actived_clients))])
+        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="n")
+        self.scrollable_radiobutton_frame.configure(width = 600, height= 200, fg_color = "transparent")
+        self.scrollable_radiobutton_frame.remove_item("item 3")
+
+        # Geração de lista de clientes Inativos
+        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Inativos"), 
+                                                                       command=self.radiobutton_frame_event,
+                                                                       item_list=[f"{i+1} - {CLIENTS.inactived_clients[i].name}" for i in range(len(CLIENTS.inactived_clients))])
+        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="n")
+        self.scrollable_radiobutton_frame.configure(width = 600, height= 200, fg_color = "transparent")
+        self.scrollable_radiobutton_frame.remove_item("item 3")
+
 
         #------------------------------------#
         ###### ====BUSCA DE CLIENTES====######
@@ -405,14 +439,15 @@ class App(customtkinter.CTk):
     # ==========FUNÇÕES==========
 
     # Definir o tema da janela
-
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
 
+    # ATualizar Barra de Progresso
     def update_progress_bar(self, value):
         self.progressbar.set(value)
         self.update()
 
+    # Atualizar escrita do botão de busca
     def update_search_button(self):
         global NUM_SEARCHES
         if NUM_SEARCHES > 0:
@@ -422,7 +457,6 @@ class App(customtkinter.CTk):
     def radiobutton_frame_event(self):
         print(f"radiobutton frame modified: {self.scrollable_radiobutton_frame.get_checked_item()}")
     # ===========================
-        # Valores Default
 
 ### MAIN ###
 if __name__ == "__main__":
