@@ -6,6 +6,7 @@ import tkinter.scrolledtext
 import re
 import tkinter.messagebox
 import customtkinter
+import os
 from PIL import Image
 
 ### CLASSES ###
@@ -201,7 +202,7 @@ def browse_pdf():
     global pdf_file
     pdf_file = tkinter.filedialog.askopenfilename(
         filetypes=[('Arquivos PDF', '*.pdf')])
-
+    return pdf_file
 #Busca os clientes no arquivo PDF
 def seek_client(app):
 
@@ -294,6 +295,14 @@ class App(customtkinter.CTk):
         self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1, 2), weight=1)
         
+        #Importação das imagens
+        self.upload_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\upload_light.png"),
+                                                  dark_image=Image.open(r".\icons\upload_dark.png"),
+                                                  size=(18, 18))
+        self.find_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\find_light.png"),
+                                                  dark_image=Image.open(r".\icons\find_dark.png"),
+                                                  size=(18, 18))
+
         #---------------------------------#
         ###### ====BARRA LATERAL====######
         self.sidebar_frame = customtkinter.CTkFrame(
@@ -396,14 +405,16 @@ class App(customtkinter.CTk):
         self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
 
         # BOTÃO DE SELAÇÃO DO DIÁRIO
+        
+        
         self.button_pdf_find = customtkinter.CTkButton(
-            self.results_frame, command=browse_pdf, text='Selecionar Diário')
+            self.results_frame, command=self.browse_pdfs, text='Selecionar Diário', image=self.upload_icon, width=100, height=30)
         self.button_pdf_find.grid(row=1, column=0, padx=20, pady=10)
 
         # BOTÃO DE BUSCA
         if NUM_SEARCHES == 0:
             self.button_search = customtkinter.CTkButton(
-                self.results_frame, command=lambda: seek_client(self), text='Buscar clientes')
+                self.results_frame, command=lambda: seek_client(self), text='Buscar clientes',image=self.find_icon, width=120, height=30)
             self.button_search.grid(row=2, column=0, padx=20, pady=10)
 
         #TÍTULO CAIXA DE TEXTO
@@ -453,6 +464,18 @@ class App(customtkinter.CTk):
         if NUM_SEARCHES > 0:
             self.button_search.configure(text="Nova Busca")
         return
+
+    def browse_pdfs(self):
+        caminho = browse_pdf()
+        nome_arquivo = os.path.splitext(os.path.basename(caminho))[0]
+        #Selecionar Diário
+        button_text=""
+        if len(nome_arquivo) <= 17:
+            button_text = nome_arquivo
+        else:
+            button_text = nome_arquivo[0:12]+"..."
+
+        self.button_pdf_find.configure(text=f"{button_text}")
 
     def radiobutton_frame_event(self):
         print(f"radiobutton frame modified: {self.scrollable_radiobutton_frame.get_checked_item()}")
