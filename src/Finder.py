@@ -195,14 +195,13 @@ def fill_list():
             #Adiciona na classe clients
             CLIENTS.add_client(client)
             
-    
-
 #Obtem o caminho do arquivo pdf
 def browse_pdf():
     global pdf_file
     pdf_file = tkinter.filedialog.askopenfilename(
         filetypes=[('Arquivos PDF', '*.pdf')])
     return pdf_file
+
 #Busca os clientes no arquivo PDF
 def seek_client(app):
 
@@ -298,10 +297,32 @@ class App(customtkinter.CTk):
         #Importação das imagens
         self.upload_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\upload_light.png"),
                                                   dark_image=Image.open(r".\icons\upload_dark.png"),
-                                                  size=(18, 18))
+                                                  size=(20,20))
         self.find_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\find_light.png"),
                                                   dark_image=Image.open(r".\icons\find_dark.png"),
-                                                  size=(18, 18))
+                                                  size=(20,20))
+        self.add_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\add_light.png"),
+                                                  dark_image=Image.open(r".\icons\add_dark.png"),
+                                                  size=(20,20))
+        self.hide_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\hide_light.png"),
+                                                  dark_image=Image.open(r".\icons\hide_dark.png"),
+                                                  size=(20,20))
+        self.view_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\view_light.png"),
+                                                  dark_image=Image.open(r".\icons\view_dark.png"),
+                                                  size=(20,20))
+        self.info_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\info_light.png"),
+                                                  dark_image=Image.open(r".\icons\info_dark.png"),
+                                                  size=(20,20))
+        self.view_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\view_light.png"),
+                                                  dark_image=Image.open(r".\icons\view_dark.png"),
+                                                  size=(20,20))
+        self.remove_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\remove_light.png"),
+                                                  dark_image=Image.open(r".\icons\remove_dark.png"),
+                                                  size=(20,20))
+        self.edit_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\edit_light.png"),
+                                                  dark_image=Image.open(r".\icons\edit_dark.png"),
+                                                  size=(20,20))
+        
 
         #---------------------------------#
         ###### ====BARRA LATERAL====######
@@ -385,9 +406,49 @@ class App(customtkinter.CTk):
         self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Inativos"), 
                                                                        command=self.radiobutton_frame_event,
                                                                        item_list=[f"{i+1} - {CLIENTS.inactived_clients[i].name}" for i in range(len(CLIENTS.inactived_clients))])
-        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="n")
+        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=0, sticky="n")
         self.scrollable_radiobutton_frame.configure(width = 600, height= 200, fg_color = "transparent")
         self.scrollable_radiobutton_frame.remove_item("item 3")
+
+        #FRAME-BOTÕES DE AÇÕES DE CLIENTES
+        self.frame_actions_clients = customtkinter.CTkFrame(
+            self.clients_frame, corner_radius=5, fg_color="transparent")
+        #fg_color="transparent"
+        self.frame_actions_clients.grid(row=3, column=0, padx=10,
+                                pady=10, sticky="sew")
+
+        #Botão de inserir do Cliente
+        self.button_insert_client = customtkinter.CTkButton(
+            self.frame_actions_clients, command=self.insert_client, text='', image=self.add_icon, width=150, height=30)
+        self.button_insert_client.grid(row=0, column=0, padx=5, pady=5, sticky="n")
+
+        #Botão de informações cliente
+        self.button_info_client = customtkinter.CTkButton(
+            self.frame_actions_clients, command=self.insert_client, text='', image=self.info_icon, width=150, height=30, state='disabled')
+        self.button_info_client.grid(row=0, column=1, padx=5, pady=5, sticky="n")
+
+        #Botão de Edição do cliente
+        #self.button_edit_client = customtkinter.CTkButton(
+        #    self.frame_actions_clients, command=self.insert_client, text='', image=self.edit_icon, width=120, height=30)
+        #self.button_edit_client.grid(row=0, column=2, padx=5, pady=5, sticky="n")
+
+        #Botão de Desativar/Ativar Cliente
+        self.button_hide_client = customtkinter.CTkButton(
+            self.frame_actions_clients, command=self.insert_client, text='', image=self.hide_icon, width=150, height=30)
+        self.button_hide_client.grid(row=0, column=2, padx=5, pady=5, sticky="n")
+
+        #Botão de Apagar Cliente
+        self.button_remove_client = customtkinter.CTkButton(
+            self.frame_actions_clients, command=self.insert_client, text='', image=self.remove_icon, width=150, height=30)
+        self.button_remove_client.grid(row=0, column=3, padx=5, pady=5, sticky="n")
+
+        # Centraliza verticalmente o frame
+        self.frame_actions_clients.grid_rowconfigure(0, weight=1)
+
+        # Redimensiona as colunas dos botões para ocupar o mínimo necessário
+        for i in range(4):
+            self.frame_actions_clients.grid_columnconfigure(i, minsize=120, weight=1)
+
 
 
         #------------------------------------#
@@ -405,16 +466,14 @@ class App(customtkinter.CTk):
         self.find_title_label.grid(row=0, column=0, padx=20, pady=(20, 0))
 
         # BOTÃO DE SELAÇÃO DO DIÁRIO
-        
-        
         self.button_pdf_find = customtkinter.CTkButton(
-            self.results_frame, command=self.browse_pdfs, text='Selecionar Diário', image=self.upload_icon, width=100, height=30)
+            self.results_frame, command=self.browse_pdfs, text='', image=self.upload_icon, width=150, height=30)
         self.button_pdf_find.grid(row=1, column=0, padx=20, pady=10)
 
         # BOTÃO DE BUSCA
         if NUM_SEARCHES == 0:
             self.button_search = customtkinter.CTkButton(
-                self.results_frame, command=lambda: seek_client(self), text='Buscar clientes',image=self.find_icon, width=120, height=30)
+                self.results_frame, command=lambda: seek_client(self), text='',image=self.find_icon, width=150, height=30)
             self.button_search.grid(row=2, column=0, padx=20, pady=10)
 
         #TÍTULO CAIXA DE TEXTO
@@ -437,7 +496,7 @@ class App(customtkinter.CTk):
         # BOTÃO DE CONTATAR
         if NUM_SEARCHES == 0:
             self.contact_button = customtkinter.CTkButton(
-                self.results_frame, text='Contatar Clientes')
+                self.results_frame, text='',width=150, height=30 )
             self.contact_button.grid(row=6, column=0, padx=20, pady=10)
 
         ################################
@@ -479,6 +538,10 @@ class App(customtkinter.CTk):
 
     def radiobutton_frame_event(self):
         print(f"radiobutton frame modified: {self.scrollable_radiobutton_frame.get_checked_item()}")
+    
+    def insert_client(self):
+        self.button_info_client.configure(fg_collor= "green", disabled='false')
+    
     # ===========================
 
 ### MAIN ###
