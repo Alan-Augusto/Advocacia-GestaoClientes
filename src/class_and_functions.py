@@ -638,6 +638,83 @@ def add_client(app, mode):
     button_1.grid(row=11, column=1, pady=5)
     popup.mainloop()
 
+def csv_order_by_name():
+    # Função para obter a chave de ordenação (nome do Cliente)
+    def get_sort_key(row):
+        return row['Cliente']
+
+    # Lê o arquivo CSV de entrada
+    with open(CLIENTS_CSV_FILE, 'r', newline='', encoding='utf-8') as infile:
+        reader = csv.DictReader(infile)
+        rows = list(reader)
+
+    # Ordena as linhas pelo nome do Cliente
+    sorted_rows = sorted(rows, key=get_sort_key)
+
+    # Escreve as linhas ordenadas no arquivo CSV de saída
+    with open(CLIENTS_CSV_FILE, 'w', newline='', encoding='utf-8') as outfile:
+        fieldnames = reader.fieldnames
+        writer = csv.DictWriter(outfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(sorted_rows)
+
+    print("Linhas ordenadas e escritas com sucesso!")
+
+def save_alert(app):
+    def press_yes():
+        csv_order_by_name()
+        shutil.copy2(CLIENTS_CSV_FILE, BACKUP_CSV_FILE)
+        app.destroy()
+        popup.destroy()
+
+
+    def press_no():
+        popup.destroy()
+        app.destroy()
+    
+    def press_cancel():
+        popup.destroy()
+
+
+    popup = customtkinter.CTk()
+    popup.geometry('400x100')
+    popup.title("Informações do cliente")
+    
+    frame1 = customtkinter.CTkFrame(master=popup)
+    frame1.pack(pady=10, padx=10, fill="both", expand=True)
+
+    info_label = customtkinter.CTkLabel(frame1, text='Deseja salvar antes de sair?', justify= 'center', font=customtkinter.CTkFont(size=15, weight="normal"))
+    info_label.grid(row=0, column=0)
+
+    
+    frame2 = customtkinter.CTkFrame(master=popup)
+    frame2.pack(pady=10, padx=10, fill="both", expand=True)
+
+    
+    button_yes = customtkinter.CTkButton(
+            frame2, command=lambda: press_yes(), text='Sim', width=150, height=30, anchor='w')
+    button_yes.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+    button_no = customtkinter.CTkButton(
+            frame2, command=lambda: press_no(), text='Não', width=150, height=30, anchor='w')
+    button_no.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
+
+    button_cancel = customtkinter.CTkButton(
+            frame2, command=lambda: press_cancel(), text='Cancelar', width=150, height=30, anchor='w')
+    button_cancel.grid(row=2, column=2, padx=5, pady=5, sticky="nsew")
+
+    popup.mainloop()
+
+def backup():
+    print("Backup started")
+    csv_file = tkinter.filedialog.askopenfilename(filetypes=[('Arquivos CSV', '*.csv')])
+
+    if csv_file:
+        shutil.copy(csv_file, CLIENTS_CSV_FILE)
+        print(f"Backup successful. File '{csv_file}' copied to '{CLIENTS_CSV_FILE}'")
+        mssg(title='Sucesso!', text='Nova base de dados importada! \n REINICIE O PROGRAMA', dimension='400x100')
+    else:
+        mssg(title='ERROR', text='Erro ao importar CVS como base de dados', dimension='400x100')
 
 ### PADRÕES DEFAULT DA INTERFACE ##
 # Modes: "System" (standard), "Dark", "Light"

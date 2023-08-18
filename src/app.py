@@ -21,9 +21,6 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure((0, 1, 2), weight=1)
         
         #Importação das imagens
-        self.sort_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\sort_light.png"),
-                                                  dark_image=Image.open(r".\icons\sort_dark.png"),
-                                                  size=(20,20))
         self.folder_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\folder_light.png"),
                                                   dark_image=Image.open(r".\icons\folder_dark.png"),
                                                   size=(20,20))
@@ -84,14 +81,9 @@ class App(customtkinter.CTk):
 
         #Botão de Backup dados
         self.button_insert_client = customtkinter.CTkButton(
-            self.sidebar_frame, command=lambda: '', text='Backup de dados', image=self.folder_icon, width=150, height=30, anchor='w')
+            self.sidebar_frame, command=lambda: backup(), text='Nova base de dados', image=self.folder_icon, width=150, height=30, anchor='w')
         self.button_insert_client.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
 
-        #Botão de Refrash
-        self.button_insert_client = customtkinter.CTkButton(
-            self.sidebar_frame, command=lambda: '', text='Organizar os dados', image=self.sort_icon, width=150, height=30, anchor='w')
-        self.button_insert_client.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
-        
 
         # MENU DE TEMA
         self.appearance_mode_label = customtkinter.CTkLabel(
@@ -249,6 +241,7 @@ class App(customtkinter.CTk):
 
         ################################
         
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
         
         # Valores Default
         self.appearance_mode_optionemenu.set("System")
@@ -315,6 +308,15 @@ class App(customtkinter.CTk):
         print(client_info)
         mssg(title=self.select_client, text=client_info, dimension='600x300')
 
+    def on_close(self):
+        result = save_alert(self)
+        
+        if result is None:  # Clicou em "Cancelar"
+            return
+        elif result:  # Clicou em "Sim"
+            self.save_changes()
+            
+        self.root.destroy()
     # ===========================
 
 ### MAIN ###
