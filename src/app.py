@@ -265,7 +265,7 @@ class App(customtkinter.CTk):
             self.show_client_info_popup(client_info)
         else:
             # Caso nenhum cliente esteja selecionado, exiba uma mensagem de aviso
-            print("Aviso", "Nenhum cliente selecionado.")
+            mssg(title='Opa!', text='Nenhum cliente seleiconado :(\n Selecione algum cliente para ver as informações', dimension='360x100')
     
     # Atualizar escrita do botão de busca
     def update_search_button(self):
@@ -306,7 +306,7 @@ class App(customtkinter.CTk):
     
     def show_client_info_popup(self, client_info):
         print(client_info)
-        mssg(title=self.select_client, text=client_info, dimension='600x300')
+        mssg(title=self.select_client, text=client_info, dimension='550x300')
 
     def on_close(self):
         result = save_alert(self)

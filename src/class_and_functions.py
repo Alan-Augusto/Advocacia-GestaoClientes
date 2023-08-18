@@ -107,9 +107,23 @@ class Client():
 
     ##--OTHERS--##
     def get_info(self):
-        return(
-            f'CNPJ:\t\t{self.cnpj} \nTelefone:\t\t{self.number} \nEmail:\t\t{self.email} \nRepresentante:\t{self.representative} \nAtivo:\t\t{self.actived}'
+        self.email = self.email.replace('\n', '\n\t\t')
+        info_string = (
+            f'\nCNPJ:\t\t{self.cnpj} \nTelefone:\t\t{self.number} \nEmails:\t\t{self.email} \n\nRepresentante:\t{self.representative} \nAtivo:\t\t{self.actived}'
         )
+
+        # Adicionar informações dos subclientes
+        subclient_info = ""
+        if self.subname_01 != "NA":
+            subclient_info += f'\nSub-Cliente 01:\t{self.subname_01}'
+        if self.subname_02 != "NA":
+            subclient_info += f'\nSub-Cliente 02:\t{self.subname_02}'
+        if self.subname_03 != "NA":
+            subclient_info += f'\nSub-Cliente 03:\t{self.subname_03}'
+        if self.subname_04 != "NA":
+            subclient_info += f'\nSub-Cliente 04:\t{self.subname_04}'
+
+        return subclient_info + info_string
 
     def print(self):
         print("Cited: ", self.cited, "|",self.ID, "|",
@@ -534,7 +548,7 @@ def add_client(app, mode):
 
     SEND_FORM = False
     popup = customtkinter.CTk()
-    popup.geometry('500x600')
+    popup.geometry('500x550')
     popup.title("Informações do cliente")
 
     frame1 = customtkinter.CTkFrame(master=popup)
@@ -677,31 +691,31 @@ def save_alert(app):
 
 
     popup = customtkinter.CTk()
-    popup.geometry('400x100')
+    popup.geometry('220x100')
     popup.title("Informações do cliente")
     
     frame1 = customtkinter.CTkFrame(master=popup)
-    frame1.pack(pady=10, padx=10, fill="both", expand=True)
+    frame1.pack(pady=5, padx=10, fill="both", expand=True)
 
     info_label = customtkinter.CTkLabel(frame1, text='Deseja salvar antes de sair?', justify= 'center', font=customtkinter.CTkFont(size=15, weight="normal"))
     info_label.grid(row=0, column=0)
 
     
     frame2 = customtkinter.CTkFrame(master=popup)
-    frame2.pack(pady=10, padx=10, fill="both", expand=True)
+    frame2.pack(pady=5, padx=10, fill="both", expand=True)
 
     
     button_yes = customtkinter.CTkButton(
-            frame2, command=lambda: press_yes(), text='Sim', width=150, height=30, anchor='w')
-    button_yes.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+            frame2, command=lambda: press_yes(), text='Sim', width=50, height=30, anchor='w')
+    button_yes.grid(row=2, column=0, padx=5, pady=5)
 
     button_no = customtkinter.CTkButton(
-            frame2, command=lambda: press_no(), text='Não', width=150, height=30, anchor='w')
-    button_no.grid(row=2, column=1, padx=5, pady=5, sticky="nsew")
+            frame2, command=lambda: press_no(), text='Não', width=50, height=30, anchor='w')
+    button_no.grid(row=2, column=1, padx=5, pady=5)
 
     button_cancel = customtkinter.CTkButton(
-            frame2, command=lambda: press_cancel(), text='Cancelar', width=150, height=30, anchor='w')
-    button_cancel.grid(row=2, column=2, padx=5, pady=5, sticky="nsew")
+            frame2, command=lambda: press_cancel(), text='Cancelar', width=50, height=30, anchor='w')
+    button_cancel.grid(row=2, column=2, padx=5, pady=5)
 
     popup.mainloop()
 
@@ -714,7 +728,7 @@ def backup():
         print(f"Backup successful. File '{csv_file}' copied to '{CLIENTS_CSV_FILE}'")
         mssg(title='Sucesso!', text='Nova base de dados importada! \n REINICIE O PROGRAMA', dimension='400x100')
     else:
-        mssg(title='ERROR', text='Erro ao importar CVS como base de dados', dimension='400x100')
+        mssg(title='ERROR', text='Erro ao importar CVS como base de dados', dimension='320x100')
 
 ### PADRÕES DEFAULT DA INTERFACE ##
 # Modes: "System" (standard), "Dark", "Light"
