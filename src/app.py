@@ -5,6 +5,12 @@ class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
 
+        #Variáveis Globais
+        self.state_buttons_client = 'disable'
+        self.type_clients_select = ''
+        self.select_client =''
+
+
         #Configuração da janela
         self.title("Gestão e Busca de Clientes - Campello Castro")
         self.geometry(f"{1100}x{580}")
@@ -21,8 +27,12 @@ class App(customtkinter.CTk):
         self.find_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\find_light.png"),
                                                   dark_image=Image.open(r".\icons\find_dark.png"),
                                                   size=(20,20))
+        
         self.add_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\add_light.png"),
                                                   dark_image=Image.open(r".\icons\add_dark.png"),
+                                                  size=(20,20))
+        self.edit_Icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\edit_light.png"),
+                                                  dark_image=Image.open(r".\icons\edit_dark.png"),
                                                   size=(20,20))
         self.hide_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\hide_light.png"),
                                                   dark_image=Image.open(r".\icons\hide_dark.png"),
@@ -115,28 +125,28 @@ class App(customtkinter.CTk):
         
 
         # Geração de lista de todos os clientes
-        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Todos"),height=490,
-                                                                       command=self.radiobutton_frame_event,
-                                                                       item_list=[f"{i+1} - {CLIENTS.clients[i].name}" for i in range(len(CLIENTS.clients))])
-        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="nsew")
-        self.scrollable_radiobutton_frame.configure(width = 600, fg_color = "transparent")
-        self.scrollable_radiobutton_frame.remove_item("item 3")
+        self.scrollable_radiobutton_frame_all = ScrollableRadiobuttonFrame( master=self.tabview.tab("Todos"), height=490,
+                                                                           command=lambda: self.defClient_select('all'),
+                                                                           item_list=[f"{CLIENTS.clients[i].name}" for i in range(len(CLIENTS.clients))])
+        self.scrollable_radiobutton_frame_all.grid(row=0, column=0, padx=0, pady=5, sticky="nsew")
+        self.scrollable_radiobutton_frame_all.configure(width = 600, fg_color = "transparent")
+        self.scrollable_radiobutton_frame_all.remove_item("item 3")
 
         # Geração de lista de clientes Ativos
-        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Ativos"), height=490,
-                                                                       command=self.radiobutton_frame_event,
-                                                                       item_list=[f"{i+1} - {CLIENTS.actived_clients[i].name}" for i in range(len(CLIENTS.actived_clients))])
-        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=5, sticky="nsew")
-        self.scrollable_radiobutton_frame.configure(width = 600, fg_color = "transparent")
-        self.scrollable_radiobutton_frame.remove_item("item 3")
+        self.scrollable_radiobutton_frame_actived = ScrollableRadiobuttonFrame( master=self.tabview.tab("Ativos"), height=490,
+                                                                               command=lambda: self.defClient_select('actived'),
+                                                                               item_list=[f"{CLIENTS.actived_clients[i].name}" for i in range(len(CLIENTS.actived_clients))])
+        self.scrollable_radiobutton_frame_actived.grid(row=0, column=0, padx=0, pady=5, sticky="nsew")
+        self.scrollable_radiobutton_frame_actived.configure(width = 600, fg_color = "transparent")
+        self.scrollable_radiobutton_frame_actived.remove_item("item 3")
 
         # Geração de lista de clientes Inativos
-        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self.tabview.tab("Inativos"), height=490,
-                                                                       command=self.radiobutton_frame_event,
-                                                                       item_list=[f"{i+1} - {CLIENTS.inactived_clients[i].name}" for i in range(len(CLIENTS.inactived_clients))])
-        self.scrollable_radiobutton_frame.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
-        self.scrollable_radiobutton_frame.configure(width = 600, fg_color = "transparent")
-        self.scrollable_radiobutton_frame.remove_item("item 3")
+        self.scrollable_radiobutton_frame_inactived = ScrollableRadiobuttonFrame( master=self.tabview.tab("Inativos"), height=490,
+                                                                                 command=lambda: self.defClient_select('inactived'),
+                                                                                 item_list=[f"{CLIENTS.inactived_clients[i].name}" for i in range(len(CLIENTS.inactived_clients))])
+        self.scrollable_radiobutton_frame_inactived.grid(row=0, column=0, padx=0, pady=0, sticky="nsew")
+        self.scrollable_radiobutton_frame_inactived.configure(width = 600, fg_color = "transparent")
+        self.scrollable_radiobutton_frame_inactived.remove_item("item 3")
 
         #FRAME-BOTÕES DE AÇÕES DE CLIENTES
         self.frame_actions_clients = customtkinter.CTkFrame(
@@ -147,23 +157,28 @@ class App(customtkinter.CTk):
 
         #Botão de inserir do Cliente
         self.button_insert_client = customtkinter.CTkButton(
-            self.frame_actions_clients, command=self.insert_client, text='', image=self.add_icon, width=150, height=30)
+            self.frame_actions_clients, command=lambda: add_client(self,'add'), text='', image=self.add_icon, width=150, height=30)
         self.button_insert_client.grid(row=0, column=0, padx=5, pady=5, sticky="nsew")
+        
+        #Botão de editar do Cliente
+        self.button_insert_client = customtkinter.CTkButton(
+            self.frame_actions_clients, command=lambda: add_client(self, 'edit'), text='', image=self.edit_Icon, width=150, height=30)
+        self.button_insert_client.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
 
         #Botão de informações cliente
         self.button_info_client = customtkinter.CTkButton(
-            self.frame_actions_clients, command=self.insert_client, text='', image=self.info_icon, width=150, height=30, state='disabled')
-        self.button_info_client.grid(row=0, column=1, padx=5, pady=5, sticky="nsew")
+            self.frame_actions_clients, command=self.open_dialog_event, text='', image=self.info_icon, width=150, height=30)
+        self.button_info_client.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
 
         #Botão de Desativar/Ativar Cliente
         self.button_hide_client = customtkinter.CTkButton(
-            self.frame_actions_clients, command=self.insert_client, text='', image=self.hide_icon, width=150, height=30)
-        self.button_hide_client.grid(row=0, column=2, padx=5, pady=5, sticky="nsew")
+            self.frame_actions_clients, command=lambda: inactived_client(self, self.select_client), text='', image=self.hide_icon, width=150, height=30)
+        self.button_hide_client.grid(row=0, column=3, padx=5, pady=5, sticky="nsew")
 
         #Botão de Apagar Cliente
         self.button_remove_client = customtkinter.CTkButton(
-            self.frame_actions_clients, command=self.insert_client, text='', image=self.remove_icon, width=150, height=30)
-        self.button_remove_client.grid(row=0, column=3, padx=5, pady=5, sticky="nsew")
+            self.frame_actions_clients, command=lambda: remove_client(self, self.select_client), text='', image=self.remove_icon, width=150, height=30)
+        self.button_remove_client.grid(row=0, column=4, padx=5, pady=5, sticky="nsew")
 
         # Redimensiona as colunas dos botões para ocupar o mínimo necessário
         for i in range(4):
@@ -203,7 +218,7 @@ class App(customtkinter.CTk):
 
         # CAIXA DE TEXTO
         self.textbox = customtkinter.CTkTextbox(
-            self.results_frame, width=400, corner_radius=5)
+            self.results_frame,width=400, corner_radius=5)  
         self.textbox.grid(row=4, column=0, padx=(
             20, 20), pady=(0, 0), sticky="nsew")
 
@@ -237,6 +252,15 @@ class App(customtkinter.CTk):
         self.progressbar.set(value)
         self.update()
 
+    #Abrir vizualização de clientes
+    def open_dialog_event(self):
+        if self.select_client:
+            client_info = CLIENTS.get_client_info(self.select_client, type='text')
+            self.show_client_info_popup(client_info)
+        else:
+            # Caso nenhum cliente esteja selecionado, exiba uma mensagem de aviso
+            print("Aviso", "Nenhum cliente selecionado.")
+    
     # Atualizar escrita do botão de busca
     def update_search_button(self):
         global NUM_SEARCHES
@@ -256,12 +280,28 @@ class App(customtkinter.CTk):
 
         self.button_pdf_find.configure(text=f"{button_text}")
 
-    def radiobutton_frame_event(self):
-        print(f"radiobutton frame modified: {self.scrollable_radiobutton_frame.get_checked_item()}")
+    def defClient_select(self, value):
+        self.type_clients_select = value
+        self.state_buttons_client = 'enable'
+        
+        if(self.type_clients_select == 'all'):
+            self.select_client = self.scrollable_radiobutton_frame_all.get_checked_item()
+        
+        if(self.type_clients_select == 'actived'):
+            self.select_client = self.scrollable_radiobutton_frame_actived.get_checked_item()
+
+        if(self.type_clients_select == 'inactived'):
+            self.select_client = self.scrollable_radiobutton_frame_inactived.get_checked_item()
+
+        print('Cliente selecionado: '+ self.select_client)
     
     def insert_client(self):
         self.button_info_client.configure(fg_collor= "blue", disabled='false')
     
+    def show_client_info_popup(self, client_info):
+        print(client_info)
+        mssg(title=self.select_client, text=client_info, dimension='600x300')
+
     # ===========================
 
 ### MAIN ###
