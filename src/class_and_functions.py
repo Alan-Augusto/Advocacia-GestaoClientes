@@ -335,7 +335,7 @@ def generate_client_frame(app, i):
 
     return client_frame
 
-def remove_client(app, name):
+def remove_client(app, name, mode):
     # Criar uma cópia do arquivo original como backup
     shutil.copy2(CLIENTS_CSV_FILE, BACKUP_CSV_FILE)
     
@@ -358,8 +358,14 @@ def remove_client(app, name):
     # Atualize os widgets ScrollableRadiobuttonFrame
     updateScroll(app, name, '?', 'delete')
 
+    CLIENTS.clean()
     fill_list()
-    mssg(title="Cliente removido!", text=name, dimension="300x100")
+    
+    if(mode == 'delete'):
+        mssg(title="Cliente removido!", text=name, dimension="300x100")
+    elif(mode == 'edit'):
+        mssg(title="Cliente editado!", text=name, dimension="300x100")
+    
     print(f"A linha com o cliente '{name}' foi removida do arquivo.")
 
 def mssg(title, text, dimension):
@@ -462,9 +468,14 @@ def updateScroll(app, client, satate, action):
             app.scrollable_radiobutton_frame_inactived.remove_item(client)
             app.scrollable_radiobutton_frame_actived.add_item(client)
 
-def add_client_csv(app, popup, name, subname_01, subname_02, subname_03, subname_04, cnpj, email, number, representative, state):
+def add_client_csv(app, popup, name, subname_01, subname_02, subname_03, subname_04, cnpj, email, number, representative, state, mode,  
+                   old_name):
 
     state_text='TRUE'
+    
+    if(mode == 'edit'):
+        print('mode = edit')
+        remove_client(app, old_name, mode)
 
     if(name ==''):
         mssg(title="Cliente sem nome", text='Insira um nome no cliente para prosseguir', dimension="400x100")
@@ -562,9 +573,9 @@ def add_client(app, mode):
     entry_cnpj = customtkinter.CTkTextbox(frame1, width=300, height=20)
     entry_cnpj.grid(row=6, column=1, pady=5)
 
-    email_label = customtkinter.CTkLabel(frame1, text='email:', justify= 'left', font=customtkinter.CTkFont(size=15, weight="normal"))
+    email_label = customtkinter.CTkLabel(frame1, text='Emails:', justify= 'left', font=customtkinter.CTkFont(size=15, weight="normal"))
     email_label.grid(row=7, column=0)
-    entry_email = customtkinter.CTkTextbox(frame1, width=300, height=20)
+    entry_email = customtkinter.CTkTextbox(frame1, width=300, height=80)
     entry_email.grid(row=7, column=1, pady=5)
 
     number_label = customtkinter.CTkLabel(frame1, text='Telefone:', justify= 'left', font=customtkinter.CTkFont(size=15, weight="normal"))
@@ -585,20 +596,16 @@ def add_client(app, mode):
     if(mode == 'edit'):
         print('editar cliente')
         entry_name.insert('end', client_info.get_names(1))
-        entry_subname_01.insert('end', client_info.get_names(2))
-        entry_subname_02.insert('end', client_info.get_names(3))
-        entry_subname_03.insert('end', client_info.get_names(4))
-        entry_subname_04.insert('end', client_info.get_names(5))
-        entry_cnpj.insert('end', client_info.get_cnpj())
-        entry_email.insert('end', client_info.get_email())
-        entry_number.insert('end', client_info.get_number())
-        entry_representative.insert('end', client_info.get_representative())
-        if client_info.is_active():
-            switch_1.select()
-            print('is_active')
-        else:
-            switch_1.deselect()
-            print('in not active')
+        if client_info.get_names(2) != 'NA': entry_subname_01.insert('end', client_info.get_names(2))
+        if client_info.get_names(3) != 'NA': entry_subname_02.insert('end', client_info.get_names(3))
+        if client_info.get_names(4) != 'NA': entry_subname_03.insert('end', client_info.get_names(4))
+        if client_info.get_names(5) != 'NA': entry_subname_04.insert('end', client_info.get_names(5))
+        if client_info.get_cnpj() != 'NA': entry_cnpj.insert('end', client_info.get_cnpj())
+        if client_info.get_email() != 'NA': entry_email.insert('end', client_info.get_email())
+        if client_info.get_number() != 'NA': entry_number.insert('end', client_info.get_number())
+        if client_info.get_representative() != 'NA': entry_representative.insert('end', client_info.get_representative())
+        
+        switch_1.select() if client_info.is_active() else switch_1.deselect()
         
         button_1 = customtkinter.CTkButton(master=frame1, command=lambda: add_client_csv(app, popup, 
                                                                                         entry_name.get('1.0', 'end').strip(), 
@@ -610,7 +617,8 @@ def add_client(app, mode):
                                                                                         entry_email.get('1.0', 'end').strip(),
                                                                                         entry_number.get('1.0', 'end').strip(),
                                                                                         entry_representative.get('1.0', 'end').strip(),
-                                                                                        switch_1.get(), mode), text='Atualizar')
+                                                                                        switch_1.get(), 
+                                                                                        mode, client_info.get_names(1)), text='Atualizar')
 
 
     else:
@@ -624,7 +632,8 @@ def add_client(app, mode):
                                                                                         entry_email.get('1.0', 'end').strip(),
                                                                                         entry_number.get('1.0', 'end').strip(),
                                                                                         entry_representative.get('1.0', 'end').strip(),
-                                                                                        switch_1.get(), mode), text='Adicionar')
+                                                                                        switch_1.get(), 
+                                                                                        mode, entry_name.get('1.0', 'end').strip()), text='Adicionar')
         
     button_1.grid(row=11, column=1, pady=5)
     popup.mainloop()

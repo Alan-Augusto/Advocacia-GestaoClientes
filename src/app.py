@@ -21,6 +21,12 @@ class App(customtkinter.CTk):
         self.grid_rowconfigure((0, 1, 2), weight=1)
         
         #Importação das imagens
+        self.sort_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\sort_light.png"),
+                                                  dark_image=Image.open(r".\icons\sort_dark.png"),
+                                                  size=(20,20))
+        self.folder_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\folder_light.png"),
+                                                  dark_image=Image.open(r".\icons\folder_dark.png"),
+                                                  size=(20,20))
         self.upload_icon = customtkinter.CTkImage(light_image=Image.open(r".\icons\upload_light.png"),
                                                   dark_image=Image.open(r".\icons\upload_dark.png"),
                                                   size=(20,20))
@@ -76,6 +82,15 @@ class App(customtkinter.CTk):
             self.sidebar_frame, text="busca de clientes", font=customtkinter.CTkFont(size=15))
         self.sidebar_description_label.grid(row=1, column=0, padx=20, pady=(0, 10))
 
+        #Botão de Backup dados
+        self.button_insert_client = customtkinter.CTkButton(
+            self.sidebar_frame, command=lambda: '', text='Backup de dados', image=self.folder_icon, width=150, height=30, anchor='w')
+        self.button_insert_client.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
+
+        #Botão de Refrash
+        self.button_insert_client = customtkinter.CTkButton(
+            self.sidebar_frame, command=lambda: '', text='Organizar os dados', image=self.sort_icon, width=150, height=30, anchor='w')
+        self.button_insert_client.grid(row=3, column=0, padx=5, pady=5, sticky="nsew")
         
 
         # MENU DE TEMA
@@ -99,8 +114,6 @@ class App(customtkinter.CTk):
         self.clients_frame.grid_rowconfigure(1, weight=1)
         self.clients_frame.grid_columnconfigure(0, weight=1, minsize=400)
 
-
-        
         #TÍTULO DO FRAME
         self.find_title_label = customtkinter.CTkLabel(
             self.clients_frame, text="Gerenciamento de clientes", font=customtkinter.CTkFont( size=22, weight="bold"))
@@ -114,7 +127,7 @@ class App(customtkinter.CTk):
 
         #Frame com filtros
         # create tabview
-        self.tabview = customtkinter.CTkTabview(self.tableframe, height=600)
+        self.tabview = customtkinter.CTkTabview(self.tableframe, height=800)
         self.tabview.grid(row=0, column=0, padx=15, pady=15)
         self.tabview.add("Ativos")
         self.tabview.add("Inativos")
@@ -177,7 +190,7 @@ class App(customtkinter.CTk):
 
         #Botão de Apagar Cliente
         self.button_remove_client = customtkinter.CTkButton(
-            self.frame_actions_clients, command=lambda: remove_client(self, self.select_client), text='', image=self.remove_icon, width=150, height=30)
+            self.frame_actions_clients, command=lambda: remove_client(self, self.select_client, mode='delete'), text='', image=self.remove_icon, width=150, height=30)
         self.button_remove_client.grid(row=0, column=4, padx=5, pady=5, sticky="nsew")
 
         # Redimensiona as colunas dos botões para ocupar o mínimo necessário
