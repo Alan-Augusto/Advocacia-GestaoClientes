@@ -24,7 +24,7 @@ Assim, sempre que uma lateração é feita em algum desses objetos, a classe é 
 Foi utilizada a biblioteca CustomTKInter que é uma variação da biblioteca TKInter. Com ela foi possível desenvolver uma interface simples mas agradável e moderna.
 Por se tratar de um MVP que será validade por poucas pessoas, não foram atentados à detalhes de responsividade.
 
-##Conclusão
+## Conclusão
 Sendo a ideia principal um sistema simples e de validação, o código possui algumas poucas lógicas não muito recomendadas do ponto de vista da programação orientada a objetos.
 Isso se dá devido ao fato da implementação e teste ter se dado mais rápida dessa forma, atingindo ao objetivo necessário.
 ### FIM
