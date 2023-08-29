@@ -378,7 +378,7 @@ def remove_client(app, name, mode):
     if(mode == 'delete'):
         mssg(title="Cliente removido!", text=name, dimension="300x100")
     elif(mode == 'edit'):
-        mssg(title="Cliente editado!", text=name, dimension="300x100")
+        mssg(title="Cliente editado!", text=name+'\n Reinicie o programa', dimension="300x100")
     
     print(f"A linha com o cliente '{name}' foi removida do arquivo.")
 
@@ -487,6 +487,8 @@ def add_client_csv(app, popup, name, subname_01, subname_02, subname_03, subname
 
     state_text='TRUE'
     
+    popup.destroy()
+    
     if(mode == 'edit'):
         print('mode = edit')
         remove_client(app, old_name, mode)
@@ -527,6 +529,7 @@ def add_client_csv(app, popup, name, subname_01, subname_02, subname_03, subname
     print (row)
 
     with open(CLIENTS_CSV_FILE, 'a', newline='', encoding='utf-8') as csv_file:
+        print("Escrevendo no csv...")
         writer = csv.writer(csv_file)
         writer.writerow([name,subname_01,subname_02,subname_03,subname_04,cnpj,email,number,representative,state_text])
     
@@ -539,9 +542,8 @@ def add_client_csv(app, popup, name, subname_01, subname_02, subname_03, subname
 
 
     CLIENTS.clean()
+    csv_order_by_name()
     fill_list()
-
-    popup.destroy()
 
 def add_client(app, mode):
     client_info = CLIENTS.get_client_info(app.select_client, type='class')
@@ -683,10 +685,12 @@ def save_alert(app):
 
 
     def press_no():
+        csv_order_by_name()
         popup.destroy()
         app.destroy()
     
     def press_cancel():
+        csv_order_by_name()
         popup.destroy()
 
 

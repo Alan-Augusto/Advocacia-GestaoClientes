@@ -322,6 +322,7 @@ class App(customtkinter.CTk):
 ### MAIN ###
 if __name__ == "__main__":
     #LER OS ARQUIVOS DO CSV
+    csv_order_by_name()
     fill_list()
     CLIENTS.print()
     CLIENTS.get_searchable_list()
